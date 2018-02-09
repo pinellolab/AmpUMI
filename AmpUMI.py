@@ -165,8 +165,8 @@ def calculateUMIs(args,parser):
             else:
                 parser.print_help()
                 exit("Either -ul or -nu is required for umi length calculation")
-            p = calculateUMIsmath(Q,args.na)
-            print("With %d umis (length %d) and %d unique molecules, the probability of no collisions is %f"%(umiCount,umiLength,args.na,p))
+            p = calculateUMIsmath(Q,args.nm)
+            print("With %d umis (length %d) and %d unique molecules, the probability of no collisions is %f"%(umiCount,umiLength,args.nm,p))
 
 def main():
         parser = argparse.ArgumentParser(prog='AmpUMI - A toolkit for designing and analyzing amplicon sequencing experiments using unique molecular identifiers')
@@ -184,7 +184,7 @@ def main():
 
         parser_calculate.add_argument("-ul",type=int,help="UMI length",required=false)
         parser_calculate.add_argument("-nu",type=int,help="Number of unique umis",required=false)
-        parser_calculate.add_argument("-na",type=int,help="Number of unique alleles")
+        parser_calculate.add_argument("-nm",type=int,help="Number of unique molecules")
         parser_calculate.set_defaults(func=calculateUMIs)
 
         if len(sys.argv)==1:
