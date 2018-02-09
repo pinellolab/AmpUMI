@@ -22,9 +22,9 @@ To calculate this probability, AmpUMI Calculate should be run with the following
 
 Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-nu``` will be calculated as ```4^ul```.
 
-For example, if we are using an 8bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing a collision can be calculated with the following command:
+For example, if we are using an 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing a collision can be calculated with the following command:
 ```
-python AmpUMI.py Calculate -ul 8 -na 10000
+python AmpUMI.py Calculate -ul 15 -na 10000
 ```
 This produces the following output:
 ```
