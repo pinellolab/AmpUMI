@@ -18,13 +18,13 @@ The calculate mode is used to compute the probability of a UMI/molecule collisio
 To calculate this probability, AmpUMI Calculate should be run with the following parameters:
 *  ```-ul``` UMI length
 *  ```-nu``` Number of unique UMIs
-*  ```-na``` Number of unique alleles
+*  ```-nm``` Number of molecules
 
 Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-nu``` will be calculated as ```4^ul```.
 
 For example, if we are using an 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing a collision can be calculated with the following command:
 ```
-python AmpUMI.py Calculate -ul 15 -na 10000
+python AmpUMI.py Calculate -ul 15 -nm 10000
 ```
 This produces the following output:
 ```
@@ -57,10 +57,11 @@ where the *$* symbol anchors the UMI match to the beginning of the read.
 If adapter sequences are present in reads, or surround UMIs, AmpUMI will trim these adapter sequences as well. For example, if your UMI design is a 5bp UMI flanked by the adapter sequnce ACCTG, this could be specified using the flag
 ```--umi_regex "ACCTGIIIIIACCTG"```
 
-In addition, if you the adapter or UMI are not always exactly at the beginning of the read, bases before the adapter and UMi (as well as the adapter and UMI) will be trimmed using by using the .* operator which represents any character. 
+In addition, if the adapter or UMI are not always exactly at the beginning of the read, bases before the adapter and UMI (as well as the adapter and UMI) will be trimmed using by using the .* operator which represents any character. 
 
 For example:
-```--umi_regex ".*ACCTGIIIIIACCTG"
+```
+--umi_regex ".*ACCTGIIIIIACCTG"
 pre-AmpUMI:  TTTACCTGAAAAAACCTGTATATATAT
 post-AmpUMI:                   TATATATAT (UMI: AAAAA)
 pre-AmpUMI:  TACCTGATATAACCTGGAGAGAG
