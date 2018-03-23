@@ -1,3 +1,0 @@
-sympy>=1.1.1
-mpmath>=1.0.0
-numpy>=1.8.2
