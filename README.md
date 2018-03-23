@@ -6,16 +6,17 @@ After downloading AmpUMI.py, the program can be run to and command line paramete
 ```
 python AmpUMI.py -h
 ```
-AmpUMI can be run in two modes: *Calculate* and *Process*.
+AmpUMI can be run in three modes: *Collision*, *Distortion* and *Process*.
 ```
-python AmpUMI.py Calculate -h
+python AmpUMI.py Collision -h
+python AmpUMI.py Distortion -h
 python AmpUMI.py Process -h
 ```
 
-### Calculate mode
-The calculate mode is used to compute the probability of a UMI/molecule collision given a number of unique UMIs or the UMI length and given a number of molecules that will be paired with the UMIs. We calculate this probability for the worst case in which all molecules have the same sequence.
+### Collision mode
+The collision mode is used to compute the probability of a UMI/molecule collision given a number of unique UMIs or the UMI length and given a number of molecules that will be paired with the UMIs. We calculate this probability for the worst case in which all molecules have the same sequence.
 
-To calculate this probability, AmpUMI Calculate should be run with the following parameters:
+To calculate this probability, AmpUMI Collision should be run with the following parameters:
 *  ```-ul``` UMI length
 *  ```-nu``` Number of unique UMIs
 *  ```-nm``` Number of molecules
@@ -24,11 +25,11 @@ Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-
 
 For example, if we are using an 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing a collision can be calculated with the following command:
 ```
-python AmpUMI.py Calculate -ul 15 -nm 10000
+python AmpUMI.py Collision -ul 15 -nm 10000
 ```
 This produces the following output:
 ```
-With 1073741824 umis (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
+With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
 ```
 
 ### Process mode
@@ -38,9 +39,9 @@ AmpUMI Process is run with the following parameters:
 *  ```--fastq``` Path to the fastq to be processed
 *  ```--fastq_out``` Path to the trimmed fastq to be written
 *  ```--umi_regex``` Regular expression specifying the umi (I) as well as any primer sequences to be trimmed (A,C,T,G).
-*  ```--min_UMI_to_print``` The minimum times a UMI must be seen to be printed (default=0)
+*  ```--min_umi_to_print``` The minimum times a UMI must be seen to be printed (default=0)
 
-AmpUMI Process mode will parse and trim the UMi and any specified adapter from each read. Next, for each UMI-sequence pair, the highest-quality sequence will be kept. Next, error correction will be performed in two steps: 1) for each UMI, the most prevalent sequence will be kept, and other less-frequent sequences will be discarded. Thus, if there are sequencing errors in the read, these will be filtered out. 2) each UMI is printed only if it was seen at least ```--min_UMI_to_print``` times. This is good for filtering sequencing errors that may affect the UMI sequence. In this case, UMIs with few reads may be the result of sequencing errors in those UMIs. Finally, duplicate reads are removed. For each UMI, only one read is printed to the final output, removing PCR duplicates. 
+AmpUMI Process mode will parse and trim the UMI and any specified adapter from each read. Next, for each UMI-sequence pair, the highest-quality sequence will be kept. Next, error correction will be performed in two steps: 1) for each UMI, the most prevalent sequence will be kept, and other less-frequent sequences will be discarded. Thus, if there are sequencing errors in the read, these will be filtered out. 2) (optional) each UMI is printed only if it was seen at least ```--min_umi_to_print``` times. This is good for filtering sequencing errors that may affect the UMI sequence. In this case, UMIs with few reads may be the result of sequencing errors in those UMIs. Finally, duplicate reads are removed. For each UMI, only one read is printed to the final output, removing PCR duplicates. 
 
 For example, if the UMI is the first 5 basepairs of a read, and the UMI consists of any possible base combination, the following command should be used:
 ```
@@ -67,7 +68,7 @@ post-AmpUMI:                   TATATATAT (UMI: AAAAA)
 pre-AmpUMI:  TACCTGATATAACCTGGAGAGAG
 post-AmpUMI:                 GAGAGAG (UMI: ATATA)
 ```
-The ```--min_UMI_to_print``` parameter sets the requirement for the minimum number of reads that must be seen for a particular UMI for it to be printed.
+The ```--min_umi_to_print``` parameter sets the requirement for the minimum number of reads that must be seen for a particular UMI for it to be printed.
 
 
 

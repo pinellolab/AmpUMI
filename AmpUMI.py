@@ -107,10 +107,9 @@ def dedupUMIs(args,parser):
 
     print("Processed " + str(umi_count) + " barcodes")
     if umi_count == 1 and umi_list[0] == '':
-        print("Warning, only the empty barcode '' was found.")
+        raise Exception("Error: only the empty barcode '' was found.")
 
     f_out = open(args.fastq_out,"w")
-
 
     collision_count = 0
     collision_count_reads = 0
@@ -125,7 +124,7 @@ def dedupUMIs(args,parser):
             collision_count += 1
             collision_count_reads += umi_seq_counts[umi_seq]
         #if this umi had too few reads
-        elif umi_seq_counts[umi_seq] < args.min_UMI_to_print:
+        elif umi_seq_counts[umi_seq] < args.min_umi_to_keep:
             too_few_reads_count += 1
             too_few_reads_count_reads += umi_seq_counts[umi_seq]
         else:
@@ -135,9 +134,24 @@ def dedupUMIs(args,parser):
 
     f_out.close()
 
+
     print("Observed %d UMI collisions (%d reads). Not printing these."%(collision_count,collision_count_reads))
     print("Observed %d UMIs (%d reads) with too few reads. Not printing these."%(too_few_reads_count,too_few_reads_count_reads))
     print("Printed %d deduplicated sequences (%d reads) to %s"%(printed_count,printed_count_reads,args.fastq_out))
+
+    if (args.write_UMI_counts):
+        f_out_ampUMI = open(args.fastq_out+".AmpUMI.out","w")
+        f_out_ampUMI.write('UMI\tCount\n')
+        for umi in sorted(umi_seq_counts):
+            f_out_ampUMI.write(umi + "\t" + str(umi_seq_counts[umi]))
+        print('Wrote UMI counts to ' + args.fastq_out+'.AmpUMI.out')
+
+    if (args.write_alleles_with_multiple_UMIs):
+        f_out_ampUMI = open(args.fastq_out+".AmpUMI.out","w")
+        f_out_ampUMI.write('UMI\tCount\n')
+        for umi in sorted(umi_seq_counts):
+            f_out_ampUMI.write(umi + "\t" + str(umi_seq_counts[umi]))
+        print('Wrote UMI counts to ' + args.fastq_out+'.AmpUMI.out')
 
 
 def calculateUMIsmath(numUMIs,numMolecules):
@@ -152,11 +166,26 @@ def calculateUMIsmath(numUMIs,numMolecules):
         return p
 
 def calculateUMIs(args,parser):
+            if (args.nm is None):
+                parser.print_help()
+                exit("Molecule count -nm is required")
+            # determine min umi len to have this max distortion
+            if args.mp is not None:
+                if args.mp == 1:
+                    exit("Non-collision p-value of 1 cannot be calculated")
+                for i in range(50):
+                    umi_count = 4**i
+                    p = calculateUMIsmath(mpf(umi_count),args.nm)
+                    if p >= args.mp:
+                        print("With %d UMIs (length %d) and %d unique molecules, the probability of no collisions is %f"%(umi_count,i,args.nm,p))
+                        exit()
+                raise Exception('Cannot find barcode length producing a p-value greater than %f', args.mp)
+
             umiCount = 0
             umiLength = 0
             if args.nu:
                 umiCount = args.nu
-                umiLength = mpmath.log(umiCount,4)
+                umiLength = log(umiCount,4)
                 Q = mpf(umiCount)
             elif args.ul:
                 umiCount = 4**args.ul
@@ -165,29 +194,122 @@ def calculateUMIs(args,parser):
             else:
                 parser.print_help()
                 exit("Either -ul or -nu is required for umi length calculation")
+
             p = calculateUMIsmath(Q,args.nm)
-            print("With %d umis (length %d) and %d unique molecules, the probability of no collisions is %f"%(umiCount,umiLength,args.nm,p))
+            print("With %d UMIs (length %d) and %d unique molecules, the probability of no collisions is %f"%(umiCount,umiLength,args.nm,p))
+
+def calculateDistortionMath(allele_fracs,umi_count,molecule_count):
+        var_I = len(allele_fracs)
+        var_J = mpf(umi_count)
+        var_n = mpf(molecule_count)
+        predicted_m = []
+        sum_predicted = 0
+        for observed_m in allele_fracs:
+            this_m = 1-exp(var_n *log(1-(mpf(observed_m)/var_J)))
+            sum_predicted += this_m
+            predicted_m.append(this_m)
+
+        outer = 1/sum_predicted
+
+        sum_allelic_distortion = 0
+
+        final_allele_fracs = []
+        for i in range(len(allele_fracs)):
+            real_m = allele_fracs[i]
+            pred_m = outer * predicted_m[i]
+            final_allele_fracs.append(pred_m)
+            sum_allelic_distortion += abs(mpf(real_m) - pred_m)
+        return sum_allelic_distortion,final_allele_fracs
+
+def calculateDistortion(args,parser):
+            if args.af is None:
+                parser.print_help()
+                exit("Allele frequencies or allele fractions -af are required")
+            if args.nm is None:
+                parser.print_help()
+                exit("Molecule count -nm is required")
+
+            parsed_allele_fracs = args.af.split(',')
+            allele_fracs = parsed_allele_fracs
+            is_allele_fractions = all(mpf(x) <=1 for x in parsed_allele_fracs)
+            if not is_allele_fractions:
+                allele_fracs = [mpf(x)/args.ns for x in parsed_allele_fracs]
+
+            # determine min umi len to have this max distortion
+            if args.md is not None:
+                if args.md == 0:
+                    exit("Max distortion of 0 cannot be calculated")
+                for i in range(50):
+                    umi_count = 4**i
+                    distortion,new_allele_fracs = calculateDistortionMath(allele_fracs = allele_fracs,umi_count =
+                            umi_count,molecule_count = args.nm)
+                    if distortion <= args.md:
+                        print("With %d UMIs (length %d) and %d molecules, the expected total allelic fraction distortion is %f"%(umi_count,i,args.nm,distortion))
+                        print("Actual\tExpected after deduplication")
+                        for i in range(len(allele_fracs)):
+                            print(str(allele_fracs[i])+ '\t' + str(new_allele_fracs[i]))
+                        exit()
+                raise Exception('Cannot find barcode length producing a distortion less than %f', args.mp)
+                
+            #otherwise, calculate distortion
+            umiCount = 0
+            umiLength = 0
+            if args.nu:
+                umiCount = args.nu
+                umiLength = log(umiCount,4)
+                Q = mpf(umiCount)
+            elif args.ul:
+                umiCount = 4**args.ul
+                umiLength = args.ul
+                Q = mpf(umiCount)
+            else:
+                parser.print_help()
+                exit("Either -ul or -nu is required")
+
+
+            distortion,new_allele_fracs = calculateDistortionMath(allele_fracs = allele_fracs,umi_count = Q,molecule_count = args.nm)
+            print("With %d UMIs (length %d) and %d molecules, the expected total allelic fraction distortion is %f"%(umiCount,umiLength,args.nm,distortion))
+            print("Actual\tExpected after deduplication")
+            for i in range(len(allele_fracs)):
+                print(str(allele_fracs[i])+ '\t' + str(new_allele_fracs[i]))
 
 def main():
-        parser = argparse.ArgumentParser(prog='AmpUMI - A toolkit for designing and analyzing amplicon sequencing experiments using unique molecular identifiers')
+        #parser = argparse.ArgumentParser(prog='AmpUMI - A toolkit for designing and analyzing amplicon sequencing experiments using unique molecular identifiers\n')
+        parser = argparse.ArgumentParser(description='AmpUMI - A toolkit for designing and analyzing amplicon sequencing experiments using unique molecular identifiers\n')
 
         subparsers = parser.add_subparsers(help='Enter a specific AmpUMI function',dest='subparser_name')
 
+        #PROCESS
         parser_run = subparsers.add_parser('Process',help='Process a fastq with UMIs for downstream processing')
         parser_run.add_argument('--fastq',required=True,help="Path to the fastq to be processed")
         parser_run.add_argument('--fastq_out',required=True,help="Path to the trimmed fastq to be written")
         parser_run.add_argument('--umi_regex',help='Regular expression specifying the umi (I) as well as any primer sequences to be trimmed (A,C,T,G)\nFor example, if the UMI is the first 5 basepairs, this should be "^IIIII".',required=True)
-        parser_run.add_argument('--min_UMI_to_print',help='The minimum times a UMI must be seen to be printed',type=int,default=0)
+        parser_run.add_argument('--min_umi_to_keep',help='The minimum times a UMI must be seen to be kept',type=int,default=0)
+        parser_run.add_argument('--write_UMI_counts',help='Flag to write counts of each UMI to a file',required=True)
+        parser_run.add_argument('--write_alleles_with_multiple_UMIs',help='Flag to write alleles with multiple UMIs to a file',required=True)
         parser_run.set_defaults(func=dedupUMIs)
 
-        parser_calculate = subparsers.add_parser('Calculate',help='Calculate UMI collision probability')
+        #CALCULATE COLLISION
+        parser_collision = subparsers.add_parser('Collision',help='Calculate UMI collision probability')
+        parser_collision_group = parser_collision.add_mutually_exclusive_group(required=True)
+        parser_collision.add_argument("-nm","--number_molecules",dest="nm",type=int,help="Number of unique molecules",required=True)
+        parser_collision_group.add_argument("-ul","--UMI_Length",dest="ul",type=int,help="UMI length",required=false)
+        parser_collision_group.add_argument("-nu","--number_UMIs",dest="nu",type=int,help="Number of unique UMIs",required=false)
+        parser_collision_group.add_argument("-mp","-max_collision_p",dest="mp",type=float,help="Maximum collision probability (If this argument is given, the program returns the minimum barcode length for which a probability of collision is at least this low.")
+        parser_collision.set_defaults(func=calculateUMIs)
 
-        parser_calculate.add_argument("-ul",type=int,help="UMI length",required=false)
-        parser_calculate.add_argument("-nu",type=int,help="Number of unique umis",required=false)
-        parser_calculate.add_argument("-nm",type=int,help="Number of unique molecules")
-        parser_calculate.set_defaults(func=calculateUMIs)
+        #DISTORTION
+        parser_distortion = subparsers.add_parser('Distortion',help='Calculate distortion of real vs observed allele frequencies')
+        parser_distortion_group = parser_distortion.add_mutually_exclusive_group(required=True)
+        parser_distortion.add_argument("-af",help='Comma-separated list of real allele frequencies or allele fractions',required=True)
+        parser_distortion.add_argument("-nm","--number_molecules",dest="nm",type=int,help="Number of molecules",required=True)
+        parser_distortion_group.add_argument("-ul","--UMI_Length",dest="ul",type=int,help='UMI length')
+        parser_distortion_group.add_argument("-nu","--number_UMIs",dest="nu",type=int,help='Number of unique UMIs')
+        parser_distortion_group.add_argument("-md","--max_distortion",dest="md",type=float,help="Maximum distortion (If this argument is given, the program returns the minimum barcode length for which the distortion is smaller than this value.")
+        parser_distortion.set_defaults(func=calculateDistortion)
 
         if len(sys.argv)==1:
+            print('HELLO~~~~~~~~~~~')
             parser.print_help()
             sys.exit(1)
         args = parser.parse_args()
