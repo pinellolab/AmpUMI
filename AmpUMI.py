@@ -110,6 +110,9 @@ def dedupUMIs(args,parser):
         raise Exception("Error: only the empty barcode '' was found.")
 
     f_out = open(args.fastq_out,"w")
+    if (args.write_alleles_with_multiple_UMIs):
+        f_out_multiUMI = open(args.fastq_out+".AmpUMI.multi.out","w")
+        f_out_multiUMI.write('discarded/kept\tCount\tUMI\tSequence\n')
 
     collision_count = 0
     collision_count_reads = 0
@@ -117,12 +120,18 @@ def dedupUMIs(args,parser):
     too_few_reads_count_reads = 0
     printed_count = 0
     printed_count_reads = 0
+    collided_umi_reads = []
     for umi_seq in umi_seq_counts:
         umi, seq = umi_seq.split(" # ")
         #if another umi had more reads than ths one...
         if umi_keys_with_most_counts[umi] != umi_seq:
             collision_count += 1
             collision_count_reads += umi_seq_counts[umi_seq]
+            if (args.write_alleles_with_multiple_UMIs):
+                other_key = umi_keys_with_most_counts[umi]
+                other_umi, other_seq = other_key.split(" # ")
+                f_out_multiUMI.write('k\t' + str(umi_seq_counts[other_key]) + "\t" + other_umi + "\t" + other_seq)
+                f_out_multiUMI.write("d\t" + str(umi_seq_counts[umi_seq])+"\t" + umi + "\t" + seq)
         #if this umi had too few reads
         elif umi_seq_counts[umi_seq] < args.min_umi_to_keep:
             too_few_reads_count += 1
@@ -142,16 +151,12 @@ def dedupUMIs(args,parser):
     if (args.write_UMI_counts):
         f_out_ampUMI = open(args.fastq_out+".AmpUMI.out","w")
         f_out_ampUMI.write('UMI\tCount\n')
-        for umi in sorted(umi_seq_counts):
-            f_out_ampUMI.write(umi + "\t" + str(umi_seq_counts[umi]))
+        for umi in sorted(umi_key_counts):
+            f_out_ampUMI.write(umi + "\t" + str(umi_key_counts[umi]) + "\n")
         print('Wrote UMI counts to ' + args.fastq_out+'.AmpUMI.out')
 
     if (args.write_alleles_with_multiple_UMIs):
-        f_out_ampUMI = open(args.fastq_out+".AmpUMI.out","w")
-        f_out_ampUMI.write('UMI\tCount\n')
-        for umi in sorted(umi_seq_counts):
-            f_out_ampUMI.write(umi + "\t" + str(umi_seq_counts[umi]))
-        print('Wrote UMI counts to ' + args.fastq_out+'.AmpUMI.out')
+        print('Wrote UMI collisions to ' + args.fastq_out+'.AmpUMI.multi.out')
 
 
 def calculateUMIsmath(numUMIs,numMolecules):
@@ -285,8 +290,8 @@ def main():
         parser_run.add_argument('--fastq_out',required=True,help="Path to the trimmed fastq to be written")
         parser_run.add_argument('--umi_regex',help='Regular expression specifying the umi (I) as well as any primer sequences to be trimmed (A,C,T,G)\nFor example, if the UMI is the first 5 basepairs, this should be "^IIIII".',required=True)
         parser_run.add_argument('--min_umi_to_keep',help='The minimum times a UMI must be seen to be kept',type=int,default=0)
-        parser_run.add_argument('--write_UMI_counts',help='Flag to write counts of each UMI to a file',required=True)
-        parser_run.add_argument('--write_alleles_with_multiple_UMIs',help='Flag to write alleles with multiple UMIs to a file',required=True)
+        parser_run.add_argument('--write_UMI_counts',help='Flag to write counts of each UMI to a file',action='store_true')
+        parser_run.add_argument('--write_alleles_with_multiple_UMIs',help='Flag to write alleles with multiple UMIs to a file',action='store_true')
         parser_run.set_defaults(func=dedupUMIs)
 
         #CALCULATE COLLISION
@@ -309,7 +314,6 @@ def main():
         parser_distortion.set_defaults(func=calculateDistortion)
 
         if len(sys.argv)==1:
-            print('HELLO~~~~~~~~~~~')
             parser.print_help()
             sys.exit(1)
         args = parser.parse_args()
