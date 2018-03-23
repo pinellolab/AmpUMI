@@ -295,7 +295,7 @@ def main():
         parser_collision.add_argument("-nm","--number_molecules",dest="nm",type=int,help="Number of unique molecules",required=True)
         parser_collision_group.add_argument("-ul","--UMI_Length",dest="ul",type=int,help="UMI length",required=false)
         parser_collision_group.add_argument("-nu","--number_UMIs",dest="nu",type=int,help="Number of unique UMIs",required=false)
-        parser_collision_group.add_argument("-mp","-max_collision_p",dest="mp",type=float,help="Maximum collision probability (If this argument is given, the program returns the minimum barcode length for which a probability of collision is at least this low.")
+        parser_collision_group.add_argument("-mp","-min_collision_p",dest="mp",type=float,help="Minimum collision probability (If this argument is given, the program returns the minimum barcode length for which a probability of observing no collisions is at least this value.")
         parser_collision.set_defaults(func=calculateUMIs)
 
         #DISTORTION
