@@ -47,6 +47,7 @@ python AmpUMI.py Collision -nm 10000 -mp 0.95
 This produces the following output:
 ```
 With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
+```
 
 The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI shoule be run as follows:
 ```
@@ -138,11 +139,12 @@ python AmpUMI.py Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 -ul 5
 This produces the following output:
 ```
 With 1024 UMIs (length 5) and 1000 molecules, the expected total allelic fraction distortion is 0.064952
-Actual  Expected after deduplication
-0.5     0.467523770626148
-0.3     0.307316077591381
-0.1     0.112580075891235
-0.1     0.112580075891235
+Actual  | Expected after deduplication
+---------------: | -------------------:
+0.5   |  0.467523770626148
+0.3   |  0.307316077591381
+0.1   |  0.112580075891235
+0.1   |  0.112580075891235
 ```
 This demonstrates that the presence of minor alleles (i.e. the alleles with 10% presence in the real population) are overestimated with barcode complexity that is too low, and that major alleles (i.e. the allele with 50% presence in the real poluation) are underestimated. 
 
@@ -153,11 +155,12 @@ python AmpUMI.py Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 --max_distortion 0.01
 This produces the following output:
 ```
 With 16384 UMIs (length 7) and 1000 molecules, the expected total allelic fraction distortion is 0.004256
-Actual  Expected after deduplication
-0.5     0.497872213416257
-0.3     0.300542912015644
-0.1     0.10079243728405
-0.1     0.10079243728405
+Actual | Expected after deduplication
+---------------: | -------------------:
+0.5  |   0.497872213416257
+0.3  |   0.300542912015644
+0.1  |   0.10079243728405
+0.1  |    0.10079243728405
 ```
 
 ### Process mode
