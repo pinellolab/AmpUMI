@@ -82,9 +82,8 @@ This produces the following output:
 ```
 With 1073741824 UMIs (length 15) and 10000 molecules, the expected number of collisions is 0.046561
 
-Allelic fraction | Number of collisions
----------------: | -------------------:
-1                | 0.0465613603591919
+Allelic fraction  Number of collisions
+1                 0.0465613603591919
 
 ```
 
@@ -100,10 +99,9 @@ This produces the following output:
 ```
 With 65536 UMIs (length 8) and 10000 molecules, the expected number of collisions is 386.052363
 
-Allelic fraction   |     Number of collisions
----------------: | -------------------:
-0.4  |   119.612739004733
-0.6  |   266.439623527411
+Allelic fraction      Number of collisions
+0.4                   119.612739004733
+0.6                   266.439623527411
 
 ```
 
@@ -115,9 +113,8 @@ This produces the following output:
 ```
 With 16777216 UMIs (length 12) and 10000 molecules, the expected number of collisions is 2.979342
 
-Allelic fraction |       Number of collisions
----------------: | -------------------:
-1 |      2.97934236191213
+Allelic fraction       Number of collisions
+1                      2.97934236191213
 ```
 
 
@@ -139,12 +136,11 @@ python AmpUMI.py Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 -ul 5
 This produces the following output:
 ```
 With 1024 UMIs (length 5) and 1000 molecules, the expected total allelic fraction distortion is 0.064952
-Actual  | Expected after deduplication
----------------: | -------------------:
-0.5   |  0.467523770626148
-0.3   |  0.307316077591381
-0.1   |  0.112580075891235
-0.1   |  0.112580075891235
+Actual  Expected after deduplication
+0.5     0.467523770626148
+0.3     0.307316077591381
+0.1     0.112580075891235
+0.1     0.112580075891235
 ```
 This demonstrates that the presence of minor alleles (i.e. the alleles with 10% presence in the real population) are overestimated with barcode complexity that is too low, and that major alleles (i.e. the allele with 50% presence in the real poluation) are underestimated. 
 
@@ -155,12 +151,11 @@ python AmpUMI.py Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 --max_distortion 0.01
 This produces the following output:
 ```
 With 16384 UMIs (length 7) and 1000 molecules, the expected total allelic fraction distortion is 0.004256
-Actual | Expected after deduplication
----------------: | -------------------:
-0.5  |   0.497872213416257
-0.3  |   0.300542912015644
-0.1  |   0.10079243728405
-0.1  |    0.10079243728405
+Actual   Expected after deduplication
+0.5      0.497872213416257
+0.3      0.300542912015644
+0.1      0.10079243728405
+0.1      0.10079243728405
 ```
 
 ### Process mode
