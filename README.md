@@ -1,5 +1,7 @@
 # AmpUMI
-Toolkit for the design and analysis of amplicon sequencing experiments utilizing unique molecular identifiers (UMIs).
+Toolkit for the design and analysis of amplicon sequencing experiments utilizing unique molecular identifiers (UMIs). 
+
+For details, please see our publication at https://doi.org/10.1093/bioinformatics/bty264.
 
 ## Installation:
 AmpUMI requires the sympy, mpmath, and numpy packages, and can be installed using the command:
@@ -203,6 +205,9 @@ Setting the ```--write_UMI_counts``` flag writes the number of times each UMI ap
 
 Setting the ```--write_alleles_with_multiple_UMIs``` flag writes UMI/allele pairs for which the UMI was paired to alleles with different sequences. These are UMI collisions and these reads are discarded from the main output. 
 
+## Citation
+If you use AmpUMI, please cite our publication: 
 
+Kendell Clement, Rick Farouni, Daniel E Bauer, Luca Pinello; AmpUMI: design and analysis of unique molecular identifiers for deep amplicon sequencing, Bioinformatics, Volume 34, Issue 13, 1 July 2018, Pages i202–i210, https://doi.org/10.1093/bioinformatics/bty264
 
 
