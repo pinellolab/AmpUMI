@@ -203,6 +203,72 @@ def calculateUMIs(args,parser):
             p = calculateUMIsmath(Q,args.nm)
             print("With %d UMIs (length %d) and %d unique molecules, the probability of no collisions is %f"%(umiCount,umiLength,args.nm,p))
 
+def calculateCollisionNumberMath(allele_fracs,umi_count,molecule_count):
+        var_I = len(allele_fracs)
+        var_J = mpf(umi_count)
+        var_n = mpf(molecule_count)
+        collision_counts = []
+        sum_collisions = 0
+        for i in range(len(allele_fracs)):
+            observed_m = mpf(allele_fracs[i])
+            this_c = var_J * (1-exp(var_n *log(1-(observed_m/var_J))))
+            this_collisions = observed_m * var_n - this_c
+
+            sum_collisions += this_collisions
+            collision_counts.append(this_collisions)
+
+        return sum_collisions,collision_counts
+
+def calculateCollisionNumber(args,parser):
+            if args.af is None:
+                parser.print_help()
+                exit("Allele frequencies or allele fractions -af are required")
+            if args.nm is None:
+                parser.print_help()
+                exit("Molecule count -nm is required")
+
+            parsed_allele_fracs = args.af.split(',')
+            allele_fracs = parsed_allele_fracs
+            is_allele_fractions = all(mpf(x) <=1 for x in parsed_allele_fracs)
+            if not is_allele_fractions:
+                allele_fracs = [mpf(x)/args.ns for x in parsed_allele_fracs]
+
+            # determine min umi len to have this max number of collisions
+            if args.mn is not None:
+                for i in range(50):
+                    umi_count = 4**i
+                    sum_collisions,collision_counts = calculateCollisionNumberMath(allele_fracs = allele_fracs,umi_count =
+                            umi_count,molecule_count = args.nm)
+                    if sum_collisions <= args.mn:
+                        print("With %d UMIs (length %d) and %d molecules, the expected number of collisions is %f"%(umi_count,i,args.nm,sum_collisions))
+                        print("Allelic fraction\tNumber of collisions")
+                        for i in range(len(allele_fracs)):
+                            print(str(allele_fracs[i])+ '\t' + str(collision_counts[i]))
+                        exit()
+                raise Exception('Cannot find barcode length producing fewer than %f collisions', args.mp)
+
+            #otherwise, calculate distortion
+            umiCount = 0
+            umiLength = 0
+            if args.nu:
+                umiCount = args.nu
+                umiLength = log(umiCount,4)
+                Q = mpf(umiCount)
+            elif args.ul:
+                umiCount = 4**args.ul
+                umiLength = args.ul
+                Q = mpf(umiCount)
+            else:
+                parser.print_help()
+                exit("Either -ul or -nu is required")
+
+
+            sum_collisions,collision_counts = calculateCollisionNumberMath(allele_fracs = allele_fracs,umi_count = Q,molecule_count = args.nm)
+            print("With %d UMIs (length %d) and %d molecules, the expected number of collisions is %f"%(umiCount,umiLength,args.nm,sum_collisions))
+            print("Allelic fraction\tNumber of collisions")
+            for i in range(len(allele_fracs)):
+                print(str(allele_fracs[i])+ '\t' + str(collision_counts[i]))
+
 def calculateDistortionMath(allele_fracs,umi_count,molecule_count):
         var_I = len(allele_fracs)
         var_J = mpf(umi_count)
@@ -312,6 +378,16 @@ def main():
         parser_distortion_group.add_argument("-nu","--number_UMIs",dest="nu",type=int,help='Number of unique UMIs')
         parser_distortion_group.add_argument("-md","--max_distortion",dest="md",type=float,help="Maximum distortion (If this argument is given, the program returns the minimum barcode length for which the distortion is smaller than this value.")
         parser_distortion.set_defaults(func=calculateDistortion)
+
+        #COLLISION NUMBER
+        parser_collision_number = subparsers.add_parser('CollisionNumber',help='Calculate expected number of collisions')
+        parser_collision_number_group = parser_collision_number.add_mutually_exclusive_group(required=True)
+        parser_collision_number.add_argument("-af",help='Comma-separated list of real allele frequencies or allele fractions',required=True)
+        parser_collision_number.add_argument("-nm","--number_molecules",dest="nm",type=int,help="Number of molecules",required=True)
+        parser_collision_number_group.add_argument("-ul","--UMI_Length",dest="ul",type=int,help='UMI length')
+        parser_collision_number_group.add_argument("-nu","--number_UMIs",dest="nu",type=int,help='Number of unique UMIs')
+        parser_collision_number_group.add_argument("-mn","--max_collision_number",dest="mn",type=float,help="Maximum collision number (If this argument is given, the program returns the minimum barcode length for which the number of collisions is smaller than this value.")
+        parser_collision_number.set_defaults(func=calculateCollisionNumber)
 
         if len(sys.argv)==1:
             parser.print_help()

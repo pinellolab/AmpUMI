@@ -12,9 +12,10 @@ After downloading AmpUMI.py, the program can be run to and command line paramete
 ```
 python AmpUMI.py -h
 ```
-AmpUMI can be run in three modes: *Collision*, *Distortion* and *Process*. The *Collision* and *Distortion* commands are for use in selecting an appropriate UMI length during the experiment design process, and *Process* is used for processing FASTQ reads after an amplicon sequencing experiment.
+AmpUMI can be run in four modes: *Collision*, *CollisionNumber*, *Distortion* and *Process*. The *Collision*, *CollisionNumber* and *Distortion* commands are for use in selecting an appropriate UMI length during the experiment design process, and *Process* is used for processing FASTQ reads after an amplicon sequencing experiment.
 ```
 python AmpUMI.py Collision -h
+python AmpUMI.py CollisionNumber -h
 python AmpUMI.py Distortion -h
 python AmpUMI.py Process -h
 ```
@@ -28,7 +29,7 @@ To calculate this probability, AmpUMI Collision should be run with the following
 
 Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-nu``` will be calculated as ```4^ul```.
 
-For example, if we are using an 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing no collisions can be calculated with the following command:
+For example, if we are using a 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing no collisions can be calculated with the following command:
 ```
 python AmpUMI.py Collision -ul 15 -nm 10000
 ```
@@ -44,7 +45,78 @@ python AmpUMI.py Collision -nm 10000 -mp 0.95
 This produces the following output:
 ```
 With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
+
+The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI shoule be run as follows:
 ```
+python AmpUMI.py Collision -nm 10000 -mp 0.95
+```
+This produces the following output:
+```
+With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
+```
+
+
+
+### CollisionNumber mode
+The *CollisionNumber* mode is used to calculate the expected number of collisions given a UMI length and the number of molecules in the experiment, and the distribution of alleles in the experiment.
+
+To calculate the number of collisions, AmpUMI CollisionNumber should be run with the following parameters:
+*  ```-ul``` UMI length or ```-nu``` Number of unique UMIs
+*  ```-nm``` Number of molecules
+*  ```-af``` Comma-separated list of allele frequencies or allele fractions
+
+Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-nu``` will be calculated as ```4^ul```.
+
+The case with the highest expected number of collisions is the case where there is only one allele. If the allele distribution is not known, this worst case should be calculated by running with the argument ```-af 1```.  
+
+For example, if we are using a 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the expected number of collisions can be calculated with the following command:
+
+```
+python AmpUMI.py CollisionNumber -ul 15 -nm 10000 -af 1
+```
+
+This produces the following output:
+```
+With 1073741824 UMIs (length 15) and 10000 molecules, the expected number of collisions is 0.046561
+
+Allelic fraction | Number of collisions
+---------------: | -------------------:
+1                | 0.0465613603591919
+
+```
+
+Thus, there is fewer than one (0.047) collision expected for this experimental setup. For each allele fraction specified with the ```-af``` flag, the output describes how many collisions are expected for that allele. In this case, there is only one allele (100% of alleles) and there are 0.047 collisions expected for that allele. 
+
+With more than one allele, if we were using a 8bp UMI aith 10,000 molecules, with a 40/60 mixture of alleles, we could calculate the expected number of colliisons using the command: 
+
+```
+python AmpUMI.py CollisionNumber -ul 8 -nm 10000 -af 0.4,0.6
+```
+
+This produces the following output:
+```
+With 65536 UMIs (length 8) and 10000 molecules, the expected number of collisions is 386.052363
+
+Allelic fraction   |     Number of collisions
+---------------: | -------------------:
+0.4  |   119.612739004733
+0.6  |   266.439623527411
+
+```
+
+The minimum barcode length required to have fewer than a specified number of expected collisions can also be calculated using this command by using the ```--max_collision_number``` (```-mn```)  parameter. For example, to compute the minimum UMI length in order to observe no greater than 5 expected collisions in an experiment with 10,000 molecules, AmpUMI shoule be run as follows:
+```
+python AmpUMI.py CollisionNumber -nm 10000 -mn 5 -af 1
+```
+This produces the following output:
+```
+With 16777216 UMIs (length 12) and 10000 molecules, the expected number of collisions is 2.979342
+
+Allelic fraction |       Number of collisions
+---------------: | -------------------:
+1 |      2.97934236191213
+```
+
 
 ### Distortion mode
 In amplicon sequencing experiments using UMIs, the observed allelic fraction of each variant can be distorted if the UMI length is too short and the UMI complexity is too low. In the case in which allele variants are present at roughly the same proportion in the population this distortion will be small, as UMI-molecule collisions will affect each molecule type equally. However, as the proportion of allele variants becomes more imbalanced, after deduplication using UMIs the observed frequency of rare alleles will increase, and the observed frequency of frequent alleles will be lower than the actual frequency in the population. Intuitively, this is because collisions are more frequent in the more frequent alleles, where a larger UMI diversity is required to avoid UMI-molecule collisions. Rare allele with few reads are less likely to exhaust the available unique UMIs. The *Distortion* mode can be used to compute the expected allelic distortion that would arise from having a specific UMI length.
