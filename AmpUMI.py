@@ -83,6 +83,7 @@ def dedupUMIs(args,parser):
                     umi_seq_best_qual_fastqs[this_key] = id_line + trimmed_seq + plus_line + trimmed_qual
                 else:
                     umi_seq_counts[this_key] += 1
+                    #if this sequence has the highest quality, store it
                     if umi_seq_best_qual_sum[this_key] < trimmed_qual_sum:
                         umi_seq_best_qual_sum[this_key] = trimmed_qual_sum
                         umi_seq_best_qual_fastqs[this_key] = id_line + trimmed_seq + plus_line + trimmed_qual
@@ -91,8 +92,9 @@ def dedupUMIs(args,parser):
                     umi_key_counts[this_UMI] = 1
                     umi_keys_with_most_counts[this_UMI] = this_key
                 else:
+                    umi_key_counts[this_UMI] += 1
+                    #if this sequence is the most seen for this UMI, store it
                     if umi_seq_counts[this_key] > umi_key_counts[this_UMI]:
-                        umi_key_counts[this_UMI] =  umi_key_counts[this_UMI]
                         umi_keys_with_most_counts[this_UMI] = this_key
 
     if read_count == 0:
@@ -347,6 +349,7 @@ def calculateDistortion(args,parser):
 def main():
         #parser = argparse.ArgumentParser(prog='AmpUMI - A toolkit for designing and analyzing amplicon sequencing experiments using unique molecular identifiers\n')
         parser = argparse.ArgumentParser(description='AmpUMI - A toolkit for designing and analyzing amplicon sequencing experiments using unique molecular identifiers\n')
+        parser.add_argument('--version', action='version', version='%(prog)s 1.2')
 
         subparsers = parser.add_subparsers(help='Enter a specific AmpUMI function',dest='subparser_name')
 
