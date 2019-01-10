@@ -10,7 +10,7 @@ pip install git+git://github.com/pinellolab/AmpUMI.git
 ```
 
 ## Usage:
-After downloading AmpUMI.py, the program can be run to and command line parameters can be shown using the command:
+After downloading AmpUMI.py, the program can be run and command line parameters can be shown using the command:
 ```
 python AmpUMI.py -h
 ```
