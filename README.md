@@ -40,7 +40,7 @@ This produces the following output:
 With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
 ```
 
-The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI shoule be run as follows:
+The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI should be run as follows:
 ```
 python AmpUMI.py Collision -nm 10000 -mp 0.95
 ```
@@ -49,7 +49,7 @@ This produces the following output:
 With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
 ```
 
-The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI shoule be run as follows:
+The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI should be run as follows:
 ```
 python AmpUMI.py Collision -nm 10000 -mp 0.95
 ```
@@ -89,7 +89,7 @@ Allelic fraction  Number of collisions
 
 Thus, there is fewer than one (0.047) collision expected for this experimental setup. For each allele fraction specified with the ```-af``` flag, the output describes how many collisions are expected for that allele. In this case, there is only one allele (100% of alleles) and there are 0.047 collisions expected for that allele. 
 
-With more than one allele, if we were using a 8bp UMI aith 10,000 molecules, with a 40/60 mixture of alleles, we could calculate the expected number of colliisons using the command: 
+With more than one allele, if we were using a 8bp UMI with 10,000 molecules, with a 40/60 mixture of alleles, we could calculate the expected number of collisions using the command: 
 
 ```
 python AmpUMI.py CollisionNumber -ul 8 -nm 10000 -af 0.4,0.6
@@ -105,7 +105,7 @@ Allelic fraction      Number of collisions
 
 ```
 
-The minimum barcode length required to have fewer than a specified number of expected collisions can also be calculated using this command by using the ```--max_collision_number``` (```-mn```)  parameter. For example, to compute the minimum UMI length in order to observe no greater than 5 expected collisions in an experiment with 10,000 molecules, AmpUMI shoule be run as follows:
+The minimum barcode length required to have fewer than a specified number of expected collisions can also be calculated using this command by using the ```--max_collision_number``` (```-mn```)  parameter. For example, to compute the minimum UMI length in order to observe no greater than 5 expected collisions in an experiment with 10,000 molecules, AmpUMI should be run as follows:
 ```
 python AmpUMI.py CollisionNumber -nm 10000 -mn 5 -af 1
 ```
@@ -142,7 +142,7 @@ Actual  Expected after deduplication
 0.1     0.112580075891235
 0.1     0.112580075891235
 ```
-This demonstrates that the presence of minor alleles (i.e. the alleles with 10% presence in the real population) are overestimated with barcode complexity that is too low, and that major alleles (i.e. the allele with 50% presence in the real poluation) are underestimated. 
+This demonstrates that the presence of minor alleles (i.e. the alleles with 10% presence in the real population) are overestimated with barcode complexity that is too low, and that major alleles (i.e. the allele with 50% presence in the real population) are underestimated. 
 
 The minimum barcode length to have an allelic fraction distortion below a certain threshold can be computed by using the ```--max_distortion``` parameter. For example, in the experiment above, with allele frequencies of 50%, 30%, 10%, and 10%, the minimum barcode length to have a total allelic distortion below 1% would be computed using the following command:
 ```
@@ -184,7 +184,7 @@ where the *$* symbol anchors the UMI match to the end of the read.
 
 [Ambiguous characters](https://www.bioinformatics.org/sms/iupac.html) can be used to specify UMI locations as well. 
 
-If adapter sequences are present in reads, or surround UMIs, AmpUMI will trim these adapter sequences as well. For example, if your UMI design is a 5bp UMI flanked by the adapter sequnce ACCTG, this could be specified using the flag
+If adapter sequences are present in reads, or surround UMIs, AmpUMI will trim these adapter sequences as well. For example, if your UMI design is a 5bp UMI flanked by the adapter sequence ACCTG, this could be specified using the flag
 ```--umi_regex "ACCTGIIIIIACCTG"```
 
 In addition, if the adapter or UMI are not always exactly at the beginning of the read, bases before the adapter and UMI (as well as the adapter and UMI) will be trimmed using by using the .* operator which represents any character. 
@@ -197,7 +197,7 @@ post-AmpUMI:                   TATATATAT (UMI: AAAAA)
 pre-AmpUMI:  TACCTGATATAACCTGGAGAGAG
 post-AmpUMI:                 GAGAGAG (UMI: ATATA)
 ```
-The ```--min_umi_to_print``` parameter sets the requirement for the minimum number of reads that must be seen for a particular UMI for it to be printed. Setting this parameter will discard UMI-read pairs that occur less than a specified number of times. This can remove spurious UMIs or reads that arise from sequencing error and only appear infreqently as opposed to the more common variants that arise from source biological material.
+The ```--min_umi_to_print``` parameter sets the requirement for the minimum number of reads that must be seen for a particular UMI for it to be printed. Setting this parameter will discard UMI-read pairs that occur less than a specified number of times. This can remove spurious UMIs or reads that arise from sequencing error and only appear infrequently as opposed to the more common variants that arise from source biological material.
 
 Setting the ```--write_UMI_counts``` flag writes the number of times each UMI appeared in the sample. If a few barcodes dominate the pool, there may have been a problem with the original UMI pool or with the library construction or amplification process. 
 
