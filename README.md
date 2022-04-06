@@ -6,7 +6,7 @@ For details, please see our publication at https://doi.org/10.1093/bioinformatic
 ## Installation:
 AmpUMI requires the sympy, mpmath, and numpy packages, and can be installed using the command:
 ```
-pip install git+git://github.com/pinellolab/AmpUMI.git
+pip install git+https://github.com/pinellolab/AmpUMI.git
 ```
 
 ## Usage:
