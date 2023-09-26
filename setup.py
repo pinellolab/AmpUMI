@@ -8,5 +8,11 @@ setup(
     author='Kendell Clement',
     author_email = 'k.clement.dev@gmail.com',
     packages=find_packages(),
-    install_requires=['sympy','mpmath','numpy']
-)
+    install_requires=['sympy','mpmath','numpy'],
+
+    entry_points = {
+        'console_scripts': [
+            'AmpUMI = AmpUMI.AmpUMI:main',
+            ],
+        },
+    )
