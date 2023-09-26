@@ -9,17 +9,19 @@ AmpUMI requires the sympy, mpmath, and numpy packages, and can be installed usin
 pip install git+https://github.com/pinellolab/AmpUMI.git
 ```
 
+This will install the AmpUMI program which can be accessed by running `AmpUMI`. 
+
 ## Usage:
-After downloading AmpUMI.py, the program can be run and command line parameters can be shown using the command:
+The program can be run and command line parameters can be shown using the command:
 ```
-python AmpUMI.py -h
+AmpUMI -h
 ```
 AmpUMI can be run in four modes: *Collision*, *CollisionNumber*, *Distortion* and *Process*. The *Collision*, *CollisionNumber* and *Distortion* commands are for use in selecting an appropriate UMI length during the experiment design process, and *Process* is used for processing FASTQ reads after an amplicon sequencing experiment.
 ```
-python AmpUMI.py Collision -h
-python AmpUMI.py CollisionNumber -h
-python AmpUMI.py Distortion -h
-python AmpUMI.py Process -h
+AmpUMI Collision -h
+AmpUMI CollisionNumber -h
+AmpUMI Distortion -h
+AmpUMI Process -h
 ```
 
 ### Collision mode
@@ -33,7 +35,7 @@ Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-
 
 For example, if we are using a 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the probability of observing no collisions can be calculated with the following command:
 ```
-python AmpUMI.py Collision -ul 15 -nm 10000
+AmpUMI Collision -ul 15 -nm 10000
 ```
 This produces the following output:
 ```
@@ -42,22 +44,12 @@ With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of 
 
 The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI should be run as follows:
 ```
-python AmpUMI.py Collision -nm 10000 -mp 0.95
+AmpUMI Collision -nm 10000 -mp 0.95
 ```
 This produces the following output:
 ```
 With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
 ```
-
-The minimum barcode length required to have a probability of collisions can also be calculated using this command by using the ```--min_collision_p``` parameter. For example, to compute the minimum UMI length in order to observe no collisions in an experiment with 10,000 molecules, AmpUMI should be run as follows:
-```
-python AmpUMI.py Collision -nm 10000 -mp 0.95
-```
-This produces the following output:
-```
-With 1073741824 UMIs (length 15) and 10000 unique molecules, the probability of no collisions is 0.954506
-```
-
 
 
 ### CollisionNumber mode
@@ -75,7 +67,7 @@ The case with the highest expected number of collisions is the case where there 
 For example, if we are using a 15bp UMI, and plan to add 10,000 molecules to pair with the UMIs, the expected number of collisions can be calculated with the following command:
 
 ```
-python AmpUMI.py CollisionNumber -ul 15 -nm 10000 -af 1
+AmpUMI CollisionNumber -ul 15 -nm 10000 -af 1
 ```
 
 This produces the following output:
@@ -92,7 +84,7 @@ Thus, there is fewer than one (0.047) collision expected for this experimental s
 With more than one allele, if we were using a 8bp UMI with 10,000 molecules, with a 40/60 mixture of alleles, we could calculate the expected number of collisions using the command: 
 
 ```
-python AmpUMI.py CollisionNumber -ul 8 -nm 10000 -af 0.4,0.6
+AmpUMI CollisionNumber -ul 8 -nm 10000 -af 0.4,0.6
 ```
 
 This produces the following output:
@@ -107,7 +99,7 @@ Allelic fraction      Number of collisions
 
 The minimum barcode length required to have fewer than a specified number of expected collisions can also be calculated using this command by using the ```--max_collision_number``` (```-mn```)  parameter. For example, to compute the minimum UMI length in order to observe no greater than 5 expected collisions in an experiment with 10,000 molecules, AmpUMI should be run as follows:
 ```
-python AmpUMI.py CollisionNumber -nm 10000 -mn 5 -af 1
+AmpUMI CollisionNumber -nm 10000 -mn 5 -af 1
 ```
 This produces the following output:
 ```
@@ -131,7 +123,7 @@ Either ```-nu``` or ```-ul``` should be provided. If ```-ul``` is provided, ```-
 
 For example, in an experiment where the allele frequencies are 50%, 30%, 10%, and 10%, with a UMI length of 5 and 1000 molecules, the expected allelic distortion can be computed using the command:
 ```
-python AmpUMI.py Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 -ul 5
+AmpUMI Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 -ul 5
 ```
 This produces the following output:
 ```
@@ -146,7 +138,7 @@ This demonstrates that the presence of minor alleles (i.e. the alleles with 10% 
 
 The minimum barcode length to have an allelic fraction distortion below a certain threshold can be computed by using the ```--max_distortion``` parameter. For example, in the experiment above, with allele frequencies of 50%, 30%, 10%, and 10%, the minimum barcode length to have a total allelic distortion below 1% would be computed using the following command:
 ```
-python AmpUMI.py Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 --max_distortion 0.01
+AmpUMI Distortion -af 0.5,0.3,0.1,0.1 -nm 1000 --max_distortion 0.01
 ```
 This produces the following output:
 ```
@@ -174,7 +166,7 @@ AmpUMI Process mode will parse and trim the UMI and any specified adapter from e
 
 For example, if the UMI is the first 5 basepairs of a read, and the UMI consists of any possible base combination, the following command should be used:
 ```
-python AmpUMI.py --fastq input.fastq --fastq_out input.fastq.dedup.fastq --umi_regex "^IIIII"
+AmpUMI --fastq input.fastq --fastq_out input.fastq.dedup.fastq --umi_regex "^IIIII"
 ```
 In this example, the *^* symbol anchors the UMI match to the beginning of the read, and the next 5bp are the UMI. 
 
