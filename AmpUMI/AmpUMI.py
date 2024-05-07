@@ -94,7 +94,7 @@ def dedupUMIs(args,parser):
                 else:
                     umi_key_counts[this_UMI] += 1
                     #if this sequence is the most seen for this UMI, store it
-                    if umi_seq_counts[this_key] > umi_key_counts[this_UMI]:
+                    if umi_seq_counts[this_key] > umi_seq_counts[umi_keys_with_most_counts[this_UMI]]:
                         umi_keys_with_most_counts[this_UMI] = this_key
 
     if read_count == 0:
